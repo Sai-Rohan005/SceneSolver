@@ -19,7 +19,7 @@ def post_message(case_id):
         user_email = request.user['sub']  # Assumes JWT sets this via middleware
 
         text = data.get('text')
-        sender_id = data.get('senderId', '')
+        sender_id = user_email
 
         if not text:
             return jsonify({'error': 'Missing text'}), 400
@@ -29,17 +29,17 @@ def post_message(case_id):
             return jsonify({'error': 'Conversation not found'}), 404
 
         # Resolve senderId using case logic
-        case_obj = Case.find_by_id(case_id)
-        if not case_obj:
-            return jsonify({"error": "Case not found"}), 404
+        # case_obj = Case.find_by_id(case_id)
+        # if not case_obj:
+        #     return jsonify({"error": "Case not found"}), 404
 
-        if case_obj.get("officer") == user_email:
-            sender_id = case_obj.get("email")
-        else:
-            sender_id = case_obj.get("officer")
+        # if case_obj.get("officer") == user_email:
+        #     sender_id = case_obj.get("email")
+        # else:
+        #     sender_id = case_obj.get("officer")
 
-        if not sender_id:
-            return jsonify({'error': 'Could not resolve senderId from case'}), 400
+        # if not sender_id:
+        #     return jsonify({'error': 'Could not resolve senderId from case'}), 400
 
         convo = Conversation(
             case_id=case_id,

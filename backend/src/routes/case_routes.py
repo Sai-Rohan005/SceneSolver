@@ -461,6 +461,7 @@ def get_all_cases():
                 "description": case.get("description", ""),
                 "status": case.get("status", "Unknown"),
                 "case_type": case.get("case_type", "Unspecified"),
+                "officer":users.get(str(case.get("officer")), "Unknown Officer"),
                 "location": case.get("location", ""),
                 "date_of_incident": case.get("date_of_incident", ""),
                 "tags": case.get("tags", []),

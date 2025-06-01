@@ -22,6 +22,7 @@ interface Case {
   description: string;
   status: string;
   case_type: string;
+  officer:string;
   date_of_incident?: string;
   last_updated: string;
   user_email: string;
@@ -40,32 +41,28 @@ export default function AdminDashboard() {
     return format(new Date(isoDate), "PPP");
   };
 
-  useEffect(()=>{
-    const getRole=async()=>{
+  // useEffect(()=>{
+  //   const getRole=async()=>{
 
-      try{
-        const get_role=await axios.get("http://localhost:7070/api/auth/protected",{
-              headers: { "x-auth-token": token },
-            })
-        if(get_role.data.role!="admin"){
-          navigate('*')
-        }
+  //     try{
+  //       const get_role=await axios.get("http://localhost:7070/api/auth/protected",{
+  //             headers: { "x-auth-token": token },
+  //           })
+  //       if(get_role.data.role!="admin"){
+  //         navigate('*')
+  //       }
   
-      }catch(err){
-        console.log(err);
-      }
-    }
-    getRole();
-  },[])
+  //     }catch(err){
+  //       console.log(err);
+  //     }
+  //   }
+  //   getRole();
+  // },[])
 
   useEffect(() => {
     const fetchAllCases = async () => {
       try {
-        const response = await fetch("http://localhost:7070/api/cases/all-cases", {
-          headers: {
-            "x-auth-token": sessionStorage.getItem("authToken") || "",
-          },
-        });
+        const response = await fetch("http://localhost:7070/api/cases/all-cases");
 
         if (!response.ok) throw new Error("Failed to fetch cases");
 
@@ -119,7 +116,7 @@ export default function AdminDashboard() {
                     <span>{c.description || "No description provided"}</span>
                   </div>
                   <div className="mb-2">
-                    <strong>Officer:</strong> {c.user_email}
+                    <strong>Officer:</strong> {c.officer}
                   </div>
                   <div className="mb-2">
                     <strong>Case Type:</strong> {c.case_type || "Unknown"}

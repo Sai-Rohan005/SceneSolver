@@ -71,6 +71,8 @@ export default function Case2() {
         images:null
     }
 
+  const user_mail = sessionStorage.getItem("email");
+
     const navigate=useNavigate();
     
     const decoded = jwtDecode<{}>(token);
@@ -173,7 +175,7 @@ export default function Case2() {
           // console.log(getmsg);
           const updatedMessages = getmsg.data.messages.map(msg => ({
             ...msg,
-            isBot: msg.senderId === decoded['email']
+            isBot: msg.senderId !== user_mail
           }));
           // console.log(updatedMessages);
           
@@ -305,7 +307,7 @@ export default function Case2() {
         // Send the message to the server
         const response = await axios.post(`http://localhost:7070/api/messages/message/${caseId}`, {
           text: currentMessage,
-          senderId: ""  // Handle senderId logic as per your requirement
+          senderId: decoded['email']  // Handle senderId logic as per your requirement
         },{
             headers: {
                 Authorization: `Bearer ${token}`,
