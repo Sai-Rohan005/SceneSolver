@@ -38,7 +38,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { jwtDecode } from "jwt-decode";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-
+interface ImageFile {
+  file: File;
+  preview: string;
+}
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -55,32 +58,20 @@ export default function Case1() {
   const { caseId } = useParams();
 
   const [caseName, setCaseName] = useState(`Case #${caseId?.replace("case-", "")}`);
-const [activeTab, setActiveTab] = useState<"sources" | "chat" | "studio" | "docs">("studio");
-  const isMobile = useIsMobile();
-  const [userId, setUserId] = useState<string | null>(null);
-  const { toast } = useToast(); // Move this inside the component function
-  // Add a new state for object detection loading
-  const [isDetectingObjects, setIsDetectingObjects] = useState(false);
-  const [summary, setSummary] = useState<string | null>(null);
-  const [typedSummary, setTypedSummary] = useState<string>("");
- 
+  const [activeTab, setActiveTab] = useState<"sources" | "chat" | "studio" | "docs">("studio");
+  const { toast } = useToast(); 
+  const [isDetectingObjects, setIsDetectingObjects] = useState(false);  
   const [canMessage,setcanMessage]=useState(false);
   const [officer,setofficer]=useState("");
-  const [ShowShareDialog,setShowShareDialog]=useState(false);
   const [showReferenceDialog, setShowReferenceDialog] = useState(false);
   const [ShowMessageDialog,setShowMessageDialog]=useState(false);
   const [cases, setCases] = useState([]);
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
-  const [showVideoCall, setShowVideoCall] = useState(false);
-  const [callend,setcallend]=useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState("lastUpdated");
   const [sortDirection, setSortDirection] = useState("desc");
-  const [emails, setEmails] = useState<{ officerEmail: string; citizenEmail: string } | null>(null);
-  const [users, setUsers] = useState<{ [email: string]: string }>({});
   const [fileeuser,setfileeuser]=useState(false)
-  const [userImages,setuserImages]=useState<string[]>([]);
   const [Imagesuploaded,setImagesuploaded]= useState<string[]>([]);
+  const [allImages, setAllImages] = useState<ImageFile[]>([]);
 
 
   // Add a new state to track whether to show the annotated image
@@ -100,11 +91,7 @@ const [activeTab, setActiveTab] = useState<"sources" | "chat" | "studio" | "docs
   const [imageAnalysis, setImageAnalysis] = useState<any[]>([]);
   const navigate = useNavigate();
 
-  // Get the user ID from sessionStorage when component mounts
-  useEffect(() => {
-    const storedUserId = sessionStorage.getItem("userid") || localStorage.getItem("user");
-    setUserId(storedUserId);
-  }, []);
+
 
 
 
@@ -126,20 +113,7 @@ const [activeTab, setActiveTab] = useState<"sources" | "chat" | "studio" | "docs
     filee()
   },[])
 
-  useEffect(()=>{
-    const fetchImages = async () =>{
-        try{
-            const getImages=await axios.get(`http://localhost:7070/api/cases/images/${caseId}`)
-            console.log(getImages)
-            const allFilePaths = getImages.data.map(image => image.file_path);
-            setImagesuploaded(allFilePaths);
-        }catch(err){
-            console.log(err);
-        }
-    }
-    fetchImages();
-},[])
-
+  
   const {
     uploadedImages,
     selectedImage,
@@ -158,15 +132,46 @@ const [activeTab, setActiveTab] = useState<"sources" | "chat" | "studio" | "docs
     handleImageEnhancement,
     detectObjects,
   } = useCaseManagement(caseId); // Pass caseId to the hook
-
+  
   // Function to handle back button click
   const handleBackClick = () => {
-    if (userId) {
-      navigate(`/dashboard/${userId}`);
-    } else {
-      navigate('/dashboard');
-    }
+    navigate('/dashboard');
+    
   };
+  
+  async function urlToImageFile(url: string): Promise<ImageFile> {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const filename = url.split('/').pop()?.split('?')[0] || 'image.jpg';
+    const file = new File([blob], filename, { type: blob.type });
+  
+    const preview = URL.createObjectURL(blob); // create a local blob URL
+  
+    return {
+      file,
+      preview
+    };
+  }
+  
+  
+  async function convertAllImages(urls: string[]) {
+    const imageFiles: ImageFile[] = await Promise.all(urls.map(url => urlToImageFile(url)));
+    
+    setAllImages(imageFiles)
+  }
+  useEffect(()=>{
+    const fetchImages = async () =>{
+        try{
+            const getImages=await axios.get(`http://localhost:7070/api/cases/images/${caseId}`)
+            const allFilePaths = getImages.data.map(image => image.file_path);
+            setImagesuploaded(allFilePaths);
+            convertAllImages(allFilePaths);
+        }catch(err){
+            console.log(err);
+        }
+    }
+    fetchImages();
+},[fileeuser])
 
   const handleDownloadReport = () => {
     if (!caseReport) return;
@@ -356,9 +361,7 @@ const [activeTab, setActiveTab] = useState<"sources" | "chat" | "studio" | "docs
     );
   }  
 
-  function handlePatternRecognition(): void {
-    throw new Error("Function not implemented.");
-  }
+
   
   useEffect(()=>{
     const get_usermail=async()=>{
@@ -370,13 +373,9 @@ const [activeTab, setActiveTab] = useState<"sources" | "chat" | "studio" | "docs
     get_usermail();
   },[])
 
-  // Inside the component, add a console log to debug
   useEffect(() => {
-    // console.log("Selected image:", selectedImage);
-    // console.log("Uploaded images:", uploadedImages);
   }, [selectedImage, uploadedImages]);
   sessionStorage.setItem("caseId", caseId);
-  // Update the detectObjects function to store the annotated image
   useEffect(() => {
     if (objectDetectionResults && 
         objectDetectionResults.results && 
@@ -442,7 +441,7 @@ const getInitials = (fullName) => {
         setInitials(initials);
       } catch (error) {
         console.error("Error fetching user data:", error);
-        setInitials("U"); // fallback initial
+        setInitials("U");
       }
     }
 
@@ -459,14 +458,12 @@ const getInitials = (fullName) => {
       });
       return;
     }
-    // console.log("Sending invitation email to:", email);
 
     try {
       const res = await fetch("http://localhost:7070/api/invitation/send-invitation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Authorization: `Bearer ${sessionStorage.getItem("authToken")}` // Uncomment if needed
         },
         body: JSON.stringify({
           email
@@ -510,13 +507,11 @@ const getInitials = (fullName) => {
                 }
           }
         );
-        // console.log(getmsg);
         const updatedMessages = getmsg.data.messages.map(msg => ({
           ...msg,
           isBot: msg.senderId !== user_mail
         }));
         
-        // console.log(updatedMessages);
         
         setChatMessages(updatedMessages);
 
@@ -552,32 +547,27 @@ const sendMessage = async () => {
   const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   setMessageInput('');
 
-  // Optimistically show the message
-  const tempId = Date.now(); // unique id for temp tracking
-  // setChatMessages((prev) => [
-  //   ...prev,
-  //   { id: tempId, text: currentMessage, isBot: false, sending: true, timestamp }
-  // ]);
+
+  const tempId = Date.now();
+
 
   try {
-    // Send the message to the server
     const response = await axios.post(`http://localhost:7070/api/messages/message/${caseId}`, {
       text: currentMessage,
-      senderId: ""  // Handle senderId logic as per your requirement
+      senderId: ""
     },{
         headers: {
             Authorization: `Bearer ${token}`,
           },
     });
 
-    // Mark message as successfully sent (remove "sending" flag)
+
     setChatMessages((prev) =>
       prev.map((msg) =>
         msg.id === tempId ? { ...msg, sending: false, failed: false, timestamp } : msg
       )
     );
 
-    // Optionally add the server's response (if it includes the full message data or metadata) to the chat
     setChatMessages((prev) => [
       ...prev,
       { id: response.data.messageId, text: currentMessage, isBot: false, sending: false, timestamp }
@@ -898,6 +888,12 @@ const sortedCases = [...filteredCases].sort((a, b) => {
             onSelectImage={setSelectedImage}
             onDeleteImage={handleDeleteImage}
           />
+          <ImageGallery
+            images={allImages}
+            selectedImage={selectedImage}
+            onSelectImage={setSelectedImage}
+            onDeleteImage={handleDeleteImage}
+          />
           
           {/* Add Analyze Evidence button below the images */}
           {uploadedImages.length > 0 && (
@@ -927,23 +923,23 @@ const sortedCases = [...filteredCases].sort((a, b) => {
         <div className={`flex-1 flex flex-col ${["studio", "chat", "docs"].includes(activeTab) ? "block" : "hidden"}`}>
           {/* Tab Navigation */}
            <div className="flex justify-between items-center p-4 border-b">
-    <Tabs value={activeTab} className="w-full" onValueChange={(value) => setActiveTab(value as "studio" | "chat" | "docs")}>
-      <TabsList className="grid w-full max-w-sm grid-cols-3">
-        <TabsTrigger value="studio" className="flex items-center gap-2">
-          <Microscope className="w-4 h-4" />
-          Studio
-        </TabsTrigger>
-        <TabsTrigger value="chat" className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4" />
-          Chat
-        </TabsTrigger>
-        <TabsTrigger value="docs" className="flex items-center gap-2">
-          <FileText className="w-4 h-4" />
-          Docs
-        </TabsTrigger>
-      </TabsList>
-    </Tabs>
-  </div>
+            <Tabs value={activeTab} className="w-full" onValueChange={(value) => setActiveTab(value as "studio" | "chat" | "docs")}>
+              <TabsList className="grid w-full max-w-sm grid-cols-3">
+                <TabsTrigger value="studio" className="flex items-center gap-2">
+                  <Microscope className="w-4 h-4" />
+                  Studio
+                </TabsTrigger>
+                <TabsTrigger value="chat" className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" />
+                  Chat
+                </TabsTrigger>
+                <TabsTrigger value="docs" className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Docs
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
 
           {/* Studio Content */}
           <div className="flex-1 flex flex-col items-center justify-center p-4 bg-card/40 w-full h-full overflow-y-auto relative">

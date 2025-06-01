@@ -31,11 +31,7 @@ export function ResultsDisplay({
           ))}
         </div>
       )}
-      {/* Object Detection Results */}
-
-
-      {/* Evidence Guide */}
-     
+      
 
       {/* Case Report */}
       {caseReport && (

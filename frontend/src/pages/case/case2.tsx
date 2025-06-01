@@ -63,7 +63,6 @@ export default function Case2() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [officer,setofficer]=useState("Chat Interface");
     const { toast } = useToast();
-    const isMobile = useIsMobile();
     const [BgColor,setBgColor]=useState("bg-white");
     const token = sessionStorage.getItem('authToken');
     const [email,setEmail]=useState("")
@@ -188,10 +187,10 @@ export default function Case2() {
       };
     
       if (caseId) {
-        fetchImages(); // Trigger fetch if caseId exists
+        fetchImages(); 
       }
     
-    }, [caseId, toast,uploadedImages]); // Effect triggers when caseId changes
+    }, [caseId, toast,uploadedImages]);
     
    
     
@@ -210,7 +209,7 @@ export default function Case2() {
     },[])
     
 
-  // Handle incoming calls
+
 
 
     
@@ -365,54 +364,54 @@ export default function Case2() {
           <div className="flex items-center gap-2 flex-shrink-0">
             {/* Share Dialog */}
             <Dialog>
-  <DialogTrigger asChild>
-    <Button variant="outline" size="sm">
-      <Share className="w-4 h-4 mr-2" />
-      Share
-    </Button>
-  </DialogTrigger>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Share this case</DialogTitle>
-      <DialogDescription>
-        Invite others to collaborate on this forensic investigation.
-      </DialogDescription>
-    </DialogHeader>
-    <div className="grid gap-4 py-4">
-      <div className="grid gap-2">
-        <Input
-          placeholder="Enter email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Input
-          placeholder="Optional message"
-          value={customMessage}
-          onChange={(e) => setCustomMessage(e.target.value)}
-        />
-        <Button size="sm" className="w-full" onClick={sendInvitation}>
-          Send invitation
-        </Button>
-      </div>
-      <Separator />
-      <div>
-        <p className="text-sm font-medium mb-2">Share link</p>
-        <div className="flex items-center gap-2">
-          <Input value={window.location.href} readOnly />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
-            }}
-          >
-            Copy
-          </Button>
-        </div>
-      </div>
-    </div>
-  </DialogContent>
-</Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Share className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Share this case</DialogTitle>
+                  <DialogDescription>
+                    Invite others to collaborate on this forensic investigation.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Input
+                      placeholder="Enter email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <Input
+                      placeholder="Optional message"
+                      value={customMessage}
+                      onChange={(e) => setCustomMessage(e.target.value)}
+                    />
+                    <Button size="sm" className="w-full" onClick={sendInvitation}>
+                      Send invitation
+                    </Button>
+                  </div>
+                  <Separator />
+                  <div>
+                    <p className="text-sm font-medium mb-2">Share link</p>
+                    <div className="flex items-center gap-2">
+                      <Input value={window.location.href} readOnly />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(window.location.href);
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* Settings Dropdown */}
             <DropdownMenu>

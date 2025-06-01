@@ -32,7 +32,7 @@ const AnalysisTools: React.FC<AnalysisToolsProps> = ({ caseId, setReportText, se
         setReportText("Error: " + data.error);
       } else {
         setReportText(data.report);
-        setImageAnalysis(data.images); // Set image analysis data here
+        setImageAnalysis(data.images); 
       }
     } catch (error) {
       setReportText("Error generating report.");

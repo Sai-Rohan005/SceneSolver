@@ -22,9 +22,6 @@ export function ImageGallery({
 }: ImageGalleryProps) {
   const { toast } = useToast();
 
-  // Add console logs for debugging
-  console.log("ImageGallery - images:", images.length);
-  console.log("ImageGallery - selectedImage:", selectedImage);
 
   if (images.length === 0) {
     return (
@@ -47,7 +44,6 @@ export function ImageGallery({
           key={index} 
           className={`relative group rounded-md border overflow-hidden flex items-center p-2 hover:bg-accent cursor-pointer ${selectedImage === image.preview ? 'bg-accent/60' : ''}`}
           onClick={() => {
-            console.log("Selecting image:", image.preview);
             onSelectImage(image.preview);
           }}
         >
