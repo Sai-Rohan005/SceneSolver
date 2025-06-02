@@ -72,6 +72,7 @@ export default function Case1() {
   const [fileeuser,setfileeuser]=useState(false)
   const [Imagesuploaded,setImagesuploaded]= useState<string[]>([]);
   const [allImages, setAllImages] = useState<ImageFile[]>([]);
+  const [onlyImages,setonlyImages]=useState(null);
 
 
   // Add a new state to track whether to show the annotated image
@@ -131,6 +132,7 @@ export default function Case1() {
     fetchCaseReport,
     handleImageEnhancement,
     detectObjects,
+    handlecommonuploads,
   } = useCaseManagement(caseId); // Pass caseId to the hook
   
   // Function to handle back button click
@@ -156,19 +158,26 @@ export default function Case1() {
   
   async function convertAllImages(urls: string[]) {
     const imageFiles: ImageFile[] = await Promise.all(urls.map(url => urlToImageFile(url)));
-    
-    setAllImages(imageFiles)
+    handlecommonuploads(imageFiles);
+    const img_arr=[]
+    imageFiles.map((f,p)=>{img_arr.push(f)});
+    setonlyImages(img_arr);
+    setAllImages(imageFiles);
   }
   useEffect(()=>{
     const fetchImages = async () =>{
+      if(fileeuser){
+
         try{
             const getImages=await axios.get(`http://localhost:7070/api/cases/images/${caseId}`)
+            console.log(getImages);
             const allFilePaths = getImages.data.map(image => image.file_path);
             setImagesuploaded(allFilePaths);
             convertAllImages(allFilePaths);
         }catch(err){
             console.log(err);
         }
+      }
     }
     fetchImages();
 },[fileeuser])
@@ -373,8 +382,7 @@ export default function Case1() {
     get_usermail();
   },[])
 
-  useEffect(() => {
-  }, [selectedImage, uploadedImages]);
+
   sessionStorage.setItem("caseId", caseId);
   useEffect(() => {
     if (objectDetectionResults && 
@@ -888,12 +896,7 @@ const sortedCases = [...filteredCases].sort((a, b) => {
             onSelectImage={setSelectedImage}
             onDeleteImage={handleDeleteImage}
           />
-          <ImageGallery
-            images={allImages}
-            selectedImage={selectedImage}
-            onSelectImage={setSelectedImage}
-            onDeleteImage={handleDeleteImage}
-          />
+          
           
           {/* Add Analyze Evidence button below the images */}
           {uploadedImages.length > 0 && (

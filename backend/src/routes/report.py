@@ -62,7 +62,7 @@ def generate_report():
         return jsonify({"error": "Case not found in database."}), 404
 
     title = case.get("title", "Unknown Case")
-    user_id = case.get("user_id")
+    user_id = case.get("officer")
     description = case.get("description", "No description provided.")
     case_type = case.get("case_type", "Unknown")
 

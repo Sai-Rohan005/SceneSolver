@@ -23,7 +23,7 @@ export function ImageGallery({
   const { toast } = useToast();
 
 
-  if (!images || images.length == 0) {
+  if (images.length == 0) {
     return (
       <div className="flex flex-col items-center justify-center flex-1 p-8 text-center text-muted-foreground">
         <div className="p-6 bg-muted/50 rounded-lg mb-6">

@@ -604,31 +604,36 @@ def upload_image_route(caseId):
     result = upload_and_save_image(file, case_id=caseId, user_id=user_email)
     return jsonify(result),200
 
+
 @case_bp.route('/images/<string:caseId>', methods=['GET'])
 def get_case_images(caseId):
     try:
-        
-
-        # Fetch images related to the case
-        images = list(db.db.images.find({"case_id": caseId}))
+        # Fetch images with only file_path and case_id
+        images = list(db.db.images.find(
+            {"case_id": caseId},
+            {"file_path": 1, "case_id": 1, "_id": 0}  # exclude _id
+        ))
 
         if not images:
-            return jsonify({"message": "No images found for this case"})
+            return jsonify({"message": "No images found for this case"}), 200
 
-        # Format ObjectId to string
-        def serialize_image(img):
-            img["_id"] = str(img["_id"])
-            if "user_id" in img:
-                img["user_id"] = str(img["user_id"])
-            return img
+        # Ensure all values are JSON serializable
+        def safe_serialize(img):
+            return {
+                "file_path": img.get("file_path", ""),
+                "case_id": str(img.get("case_id", ""))
+            }
 
-        images_data = [serialize_image(img) for img in images]
+        images_data = [safe_serialize(img) for img in images]
 
         return jsonify(images_data), 200
 
     except Exception as e:
         print(f"❌ Error fetching images for case {caseId}: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+
 
 @case_bp.route('/getfilee/<string:caseId>',methods=['GET'])
 def filee_route(caseId):

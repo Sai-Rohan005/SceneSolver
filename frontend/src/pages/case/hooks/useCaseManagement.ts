@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 
 interface ImageFile {
   file: File;
@@ -41,7 +42,10 @@ export function useCaseManagement(caseId?: string) {
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
   const [analyzedImages, setAnalyzedImages] = useState<string[]>([]);
   const [objectDetectionResults, setObjectDetectionResults] = useState<any>(null);
+  const [allImages, setAllImages] = useState<ImageFile[]>([]);
   const { toast } = useToast();
+
+
 
   const handleFileUpload = (newImages: ImageFile[]) => {
     // Add new images to the existing array instead of replacing it
@@ -153,6 +157,8 @@ export function useCaseManagement(caseId?: string) {
 
 
 
+
+
   const fetchCaseReport = async () => {
     if (!caseId) {
       toast({
@@ -257,7 +263,10 @@ export function useCaseManagement(caseId?: string) {
     }
   };
 
-  
+  const handlecommonuploads=(newImages: ImageFile[])=>{
+    setUploadedImages(newImages);
+    setSelectedImage(null);
+  }
 
   const handleImageEnhancement = async () => {
     if (uploadedImages.length === 0) return;
@@ -374,5 +383,6 @@ export function useCaseManagement(caseId?: string) {
     fetchCaseReport,
     handleImageEnhancement,
     detectObjects,
+    handlecommonuploads,
   };
 } 
