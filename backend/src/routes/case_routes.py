@@ -651,4 +651,45 @@ def filee_route(caseId):
         print(f"❌ Error checking case {caseId}: {e}")
         return jsonify({"error": str(e)}), 500
 
+@case_bp.route('/endcase/<string:caseId>',methods=['GET'])
+def end_case(caseId):
+    try:
+        case = db.db.cases.find_one({"_id": ObjectId(caseId)})
+        if case:
+            db.db.cases.update_one({"_id": ObjectId(case['_id'])}, {"$set":
+                                                                    {"status": "closed"}})
+            return jsonify({"message": "Case closed"}), 200
+        else:
+            return jsonify({"error": "No open cases found"}), 404
+    except Exception as e:
+        print(f"❌ Error closing case: {e}")
+
+@case_bp.route('/reopencase/<string:caseId>',methods=['GET'])
+def reopen_case(caseId):
+    try:
+        case = db.db.cases.find_one({"_id": ObjectId(caseId)})
+        if case:
+            db.db.cases.update_one({"_id": ObjectId(case['_id'])}, {"$set":
+                                                                    {"status": "reopen"}})
+            return jsonify({"message": "Case Reopen"}), 200
+        else:
+            return jsonify({"error": "No open cases found"}), 404
+    except Exception as e:
+        print(f"❌ Error closing case: {e}")
+
+@case_bp.route('/getstatus/<string:caseId>',methods=['GET'])
+def get_status(caseId):
+    # Your logic here
+    case = Case.find_by_id(caseId)  # This should return a dict or object
+
+    if case is None:
+        return jsonify({"error": "Case not found"}), 404
+
+    return jsonify({
+        "caseId": caseId,
+        "status": case['status']  # assuming this exists
+    }), 200
+
+
+
 

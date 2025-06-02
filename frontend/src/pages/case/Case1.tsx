@@ -73,6 +73,7 @@ export default function Case1() {
   const [Imagesuploaded,setImagesuploaded]= useState<string[]>([]);
   const [allImages, setAllImages] = useState<ImageFile[]>([]);
   const [onlyImages,setonlyImages]=useState(null);
+  const [caseEnded,setcaseEnded]=useState(false);
 
 
   // Add a new state to track whether to show the annotated image
@@ -103,6 +104,18 @@ export default function Case1() {
   if(decoded['role']!="investigator"){
     navigate("*")
   }
+
+  useEffect(()=>{
+    const get_status=async()=>{
+      const status=await axios.get(`http://localhost:7070/api/cases/getstatus/${caseId}`)
+      console.log(status);
+      if(status.data.status==="closed"){
+        setcaseEnded(true);
+      }
+    }
+    get_status();
+
+  },[])
 
   useEffect(()=>{
     const filee=async()=>{
@@ -658,6 +671,25 @@ const sortedCases = [...filteredCases].sort((a, b) => {
     }
   });
 
+  const End_case=async()=>{
+    try{
+      const end_case=await axios.get(`http://localhost:7070/api/cases/endcase/${caseId}`)
+      setcaseEnded(true);
+    }catch(err){
+      console.log(err)
+    }
+    
+  }
+  const Reopen_case=async()=>{
+    try{
+      const reopen_case=await axios.get(`http://localhost:7070/api/cases/reopencase/${caseId}`)
+      setcaseEnded(false);
+    }catch(err){
+      console.log(err)
+    }
+
+  }
+
   return (
     <div className={`flex flex-col h-screen ${BgColor}`}>
       {/* Header */}
@@ -1180,7 +1212,13 @@ const sortedCases = [...filteredCases].sort((a, b) => {
           setReportText={setReportText}
           setImageAnalysis={setImageAnalysis}
         />
+        {caseEnded ?(
+          <Button onClick={Reopen_case}>Reopen Case</Button>
 
+        ):(
+          <Button onClick={End_case}>End Case</Button>
+        )}
+        
 
         </div>
       </div>
