@@ -23,6 +23,7 @@ class Case:
         self.date = datetime.utcnow()
         self.last_updated = datetime.utcnow()
         self.images = []  # List of Image ObjectIds
+        self.report=[]
     def save(self):
         # Before save: Update lastUpdated timestamp
         self.last_updated = datetime.utcnow()

@@ -23,6 +23,7 @@ users_collection = db['users']
 @case_bp.route('', methods=['GET'])  # Note: no slash here
 @token_required
 def get_cases():
+
     try:
         # Get user_id from query parameters
         user_id = request.args.get('user_id')
@@ -49,6 +50,7 @@ def get_cases():
 @case_bp.route('/create', methods=['POST'])
 @token_required
 def create_case():
+
     try:
         data = request.get_json()
         
@@ -91,6 +93,7 @@ def create_case():
 @case_bp.route('/<case_id>', methods=['GET'])
 @token_required
 def get_case(case_id):
+    t
     try:
         # Find case by ID
         case = Case.find_by_id(case_id)
@@ -110,6 +113,7 @@ def get_case(case_id):
 @case_bp.route('/<case_id>', methods=['PUT'])
 @token_required
 def update_case(case_id):
+
     try:
         data = request.get_json()
         
@@ -154,6 +158,7 @@ def update_case(case_id):
 @case_bp.route('/<case_id>', methods=['DELETE'])
 @token_required
 def delete_case(case_id):
+
     try:
         # Find case by ID
         case = Case.find_by_id(case_id)
@@ -186,6 +191,7 @@ case_bp = Blueprint('cases', __name__)
 @case_bp.route('', methods=['GET'])  # Note: no slash here
 @token_required
 def get_cases():
+
     try:
         # Get user_id from query parameters
         user_id = request.args.get('user_id')
@@ -213,6 +219,7 @@ def get_cases():
 @case_bp.route('/create', methods=['POST'])
 @token_required
 def create_case():
+
     try:
         data = request.get_json()
         
@@ -258,6 +265,7 @@ def create_case():
 @case_bp.route('/createCommon', methods=['POST'])
 @token_required
 def create_common_case():
+
     try:
         data = request.get_json()
         
@@ -355,6 +363,7 @@ def create_common_case():
 @case_bp.route('/<case_id>', methods=['GET'])
 @token_required
 def get_case(case_id):
+
     try:
         # Find case by ID
         case = Case.find_by_id(case_id)
@@ -374,6 +383,7 @@ def get_case(case_id):
 @case_bp.route('/<case_id>', methods=['PUT'])
 @token_required
 def update_case(case_id):
+
     try:
         data = request.get_json()
         
@@ -418,6 +428,7 @@ def update_case(case_id):
 @case_bp.route('/<case_id>', methods=['DELETE'])
 @token_required
 def delete_case(case_id):
+
     try:
         # Find case by ID
         case = Case.find_by_id(case_id)
@@ -438,6 +449,7 @@ def delete_case(case_id):
         return jsonify({"error": "Server error"}), 500
 @case_bp.route('/all-cases', methods=['GET'])  # Final path: /api/cases/all-cases
 def get_all_cases():
+
     try:
         # Map user _id to email
         users = {str(user["_id"]): user.get("email", "Unknown") for user in db.users.find()}
@@ -480,6 +492,7 @@ def get_all_cases():
     
 
 def convert_objectids(obj):
+
     if isinstance(obj, list):
         return [convert_objectids(item) for item in obj]
     elif isinstance(obj, dict):
@@ -497,6 +510,7 @@ def convert_objectids(obj):
 
 @case_bp.route('/reference/<string:caseId>', methods=['GET'])
 def get_references(caseId):
+
     try:
         object_id = ObjectId(caseId)
         case_data = Case.find_by_id(object_id)
@@ -523,6 +537,7 @@ def get_references(caseId):
 
 @case_bp.route('/getRoles/<string:caseId>', methods=['GET'])
 def get_roles(caseId):
+
     try:
    
         object_id = ObjectId(caseId)
@@ -553,6 +568,7 @@ def get_roles(caseId):
 
 @case_bp.route('/getUsermail/<string:caseId>', methods=['GET'])
 def get_usermail(caseId):
+
     try:
         object_id = ObjectId(caseId)
         case_data = Case.find_by_id(object_id)
@@ -574,6 +590,7 @@ def get_usermail(caseId):
         
 @case_bp.route('/getOfficermail/<string:caseId>', methods=['GET'])
 def get_officermail(caseId):
+
     try:
         object_id = ObjectId(caseId)
         case_data = Case.find_by_id(object_id)
@@ -596,6 +613,7 @@ def get_officermail(caseId):
 @case_bp.route('/upload/<string:caseId>', methods=['POST', 'OPTIONS'])  # ← Add OPTIONS
 @token_required
 def upload_image_route(caseId):
+
     if request.method == 'OPTIONS':
         return '', 200  # Preflight response
 
@@ -607,6 +625,7 @@ def upload_image_route(caseId):
 
 @case_bp.route('/images/<string:caseId>', methods=['GET'])
 def get_case_images(caseId):
+
     try:
         # Fetch images with only file_path and case_id
         images = list(db.db.images.find(
@@ -637,6 +656,7 @@ def get_case_images(caseId):
 
 @case_bp.route('/getfilee/<string:caseId>',methods=['GET'])
 def filee_route(caseId):
+
     try:
         case = db.db.cases.find_one({"_id": ObjectId(caseId)})
         if case:
@@ -653,6 +673,7 @@ def filee_route(caseId):
 
 @case_bp.route('/endcase/<string:caseId>',methods=['GET'])
 def end_case(caseId):
+
     try:
         case = db.db.cases.find_one({"_id": ObjectId(caseId)})
         if case:
@@ -666,6 +687,7 @@ def end_case(caseId):
 
 @case_bp.route('/reopencase/<string:caseId>',methods=['GET'])
 def reopen_case(caseId):
+    
     try:
         case = db.db.cases.find_one({"_id": ObjectId(caseId)})
         if case:
@@ -691,5 +713,24 @@ def get_status(caseId):
     }), 200
 
 
+@case_bp.route('/fetch_img_analysis/<string:caseId>',methods=['GET'])
+def fetch_img_analysis(caseId):
+    try:
+        img=db.db.images.find({'case_id':caseId})
+        analysis_results = []
+        for image in img:
+            analysis_results.append({
+                "imageUrl": image.get("file_path"),
+                "crimeType": image.get("predicted_crime_type", "Unknown"),
+                "description": image.get("predicted_crime", "No description"),
+                "confidence": round(image.get("confidence_score", 0) * 100, 2)
+            })
+        return jsonify({"analysis_results": analysis_results}), 200
+        
+    
+    except Exception as e:
+        print(f"❌ Error getting image analysis: {e}")
+        return jsonify({"images":img}), 404
 
+                    
 

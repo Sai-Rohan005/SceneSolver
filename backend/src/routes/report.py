@@ -39,8 +39,12 @@ def display():
         analysis_results.append(result)
 
     return jsonify(analysis_results)
+
+
 @report_bp.route("/generate", methods=["POST"])
 def generate_report():
+
+
     case_id = request.args.get("case_id")
 
     # Fetch images
@@ -136,6 +140,10 @@ Generate a detailed forensic report including:
     try:
         response = llm([HumanMessage(content=final_prompt)])
         report_text = response.content
+        db["db.cases"].update_one(
+            {"_id": ObjectId(case_id)},
+            {"$set": {"report": report_text}}
+        )
     except Exception as e:
         return jsonify({"error": f"Error generating report: {str(e)}"}), 500
 
@@ -143,3 +151,31 @@ Generate a detailed forensic report including:
         "report": report_text,
         "images": analysis_results
     })
+
+    
+@report_bp.route("/fetch/<string:caseId>", methods=["GET"])
+def fetch_saved_report(caseId):
+    # Connect to MongoDB
+    db = get_mongo_connection()
+    if db is None:
+        return jsonify({"error": "Failed to connect to database"}), 500
+
+    # Validate and fetch case
+    try:
+        case = db.db.cases.find_one({"_id": ObjectId(caseId)})
+    except Exception as e:
+        print("Execption",e)
+        return jsonify({"error": f"Invalid case_id: {str(e)}"}), 400
+    
+
+    if not case:
+        return jsonify({"error": "Case not found."}), 404
+
+    # Get report
+    report = case.get("report", None)
+    if not report:
+        return jsonify({"message": "No report saved for this case."}), 404
+
+    return jsonify({
+        "report": report
+    }), 200

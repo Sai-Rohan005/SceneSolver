@@ -74,6 +74,10 @@ export default function Case1() {
   const [allImages, setAllImages] = useState<ImageFile[]>([]);
   const [onlyImages,setonlyImages]=useState(null);
   const [caseEnded,setcaseEnded]=useState(false);
+  const [all_img_analysis,setAll_img_analysis]=useState([]);
+  const [previousReport, setPreviousReport] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showReport, setShowReport] = useState(false);
 
 
   // Add a new state to track whether to show the annotated image
@@ -118,6 +122,23 @@ export default function Case1() {
   },[])
 
   useEffect(()=>{
+    const fetch_img_analysis=async()=>{
+      try{
+
+        const img_analysis=await axios.get(`http://localhost:7070/api/cases/fetch_img_analysis/${caseId}`)
+        if(img_analysis){
+          console.log(img_analysis);
+          setAll_img_analysis(img_analysis.data.analysis_results);
+        }
+      }catch(err){
+        console.log(err);
+      }
+      
+    }
+    fetch_img_analysis();
+  },[])
+
+  useEffect(()=>{
     const filee=async()=>{
       const filee_user=await axios.get(`http://localhost:7070/api/cases/getfilee/${caseId}`)
       if(filee_user.data.message==="common"){
@@ -126,6 +147,33 @@ export default function Case1() {
     }
     filee()
   },[])
+
+  useEffect(()=>{
+    const fetchPreviousReport = () => {
+
+      fetch(`http://localhost:7070/api/report/fetch/${caseId}`)
+        .then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) {
+            // Show error message from backend if any
+            setErrorMsg(data.error || data.message || "Failed to fetch report");
+            setShowReport(false);
+            setPreviousReport(null);
+            return;
+          }
+          setPreviousReport(data.report);
+          setShowReport(true);
+          setErrorMsg(null);
+        })
+        .catch((err) => {
+          console.error(err);
+          setErrorMsg("Error fetching previous report");
+          setShowReport(false);
+          setPreviousReport(null);
+        });
+    };
+    fetchPreviousReport();
+},[])
 
   
   const {
@@ -921,7 +969,12 @@ const sortedCases = [...filteredCases].sort((a, b) => {
             <h2 className="font-semibold">Evidence Images</h2>
           </div>
           
-          <ImageUpload onUpload={handleFileUpload} />
+          {!caseEnded && (
+            <>
+            <ImageUpload onUpload={handleFileUpload} />
+            
+            </>
+          )}
           <ImageGallery
             images={uploadedImages}
             selectedImage={selectedImage}
@@ -931,7 +984,7 @@ const sortedCases = [...filteredCases].sort((a, b) => {
           
           
           {/* Add Analyze Evidence button below the images */}
-          {uploadedImages.length > 0 && (
+          {!caseEnded && uploadedImages.length > 0 && (
             <div className="p-4 border-t mt-auto">
               <Button 
                 className="w-full" 
@@ -1027,43 +1080,47 @@ const sortedCases = [...filteredCases].sort((a, b) => {
                               </Button>
                             </>
                           )}
-                          <Button 
-                            size="sm"
-                            onClick={() => {
-                              setIsDetectingObjects(true);
-                              detectObjects().finally(() => setIsDetectingObjects(false));
-                            }}
-                            disabled={isDetectingObjects}
-                          >
-                            {isDetectingObjects ? (
-                              <>
-                                <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                                Detecting...
-                              </>
-                            ) : (
-                              <>
-                                <Search className="h-3 w-3 mr-2" />
-                                Detect Objects
-                              </>
+                          {!caseEnded && (
+                            <Button 
+                              size="sm"
+                              onClick={() => {
+                                setIsDetectingObjects(true);
+                                detectObjects().finally(() => setIsDetectingObjects(false));
+                              }}
+                              disabled={isDetectingObjects}
+                            >
+                              {isDetectingObjects ? (
+                                <>
+                                  <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                                  Detecting...
+                                </>
+                              ) : (
+                                <>
+                                  <Search className="h-3 w-3 mr-2" />
+                                  Detect Objects
+                                </>
+                              )}
+                            </Button>
+                          )}
+                          {!caseEnded && (
+                            <Button 
+                              size="sm"
+                              onClick={analyzeEvidence}
+                              disabled={isAnalyzing}
+                            >
+                              {isAnalyzing ? (
+                                <>
+                                  <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                                  Analyzing...
+                                </>
+                              ) : (
+                                <>
+                                  <Microscope className="h-3 w-3 mr-2" />
+                                  Analyze
+                                </>
+                              )}
+                            </Button>
                             )}
-                          </Button>
-                          <Button 
-                            size="sm"
-                            onClick={analyzeEvidence}
-                            disabled={isAnalyzing}
-                          >
-                            {isAnalyzing ? (
-                              <>
-                                <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                                Analyzing...
-                              </>
-                            ) : (
-                              <>
-                                <Microscope className="h-3 w-3 mr-2" />
-                                Analyze
-                              </>
-                            )}
-                          </Button>
                         </div>
                       </div>
                     </div>
@@ -1101,25 +1158,27 @@ const sortedCases = [...filteredCases].sort((a, b) => {
                           </div>
                         ))}
                       </div>
-                      <div className="mt-4">
-                        <Button 
-                          className="w-full" 
-                          onClick={analyzeEvidence}
-                          disabled={isAnalyzing}
-                        >
-                          {isAnalyzing ? (
-                            <>
-                              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                              Analyze All Images
-                            </>
-                          ) : (
-                            <>
-                              <Microscope className="h-4 w-4 mr-2" />
-                              Analyze All Images
-                            </>
-                          )}
-                        </Button>
-                      </div>
+                      {!caseEnded && (                    
+                        <div className="mt-4">
+                          <Button 
+                            className="w-full" 
+                            onClick={analyzeEvidence}
+                            disabled={isAnalyzing}
+                          >
+                            {isAnalyzing ? (
+                              <>
+                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                                Analyze All Images
+                              </>
+                            ) : (
+                              <>
+                                <Microscope className="h-4 w-4 mr-2" />
+                                Analyze All Images
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -1207,17 +1266,30 @@ const sortedCases = [...filteredCases].sort((a, b) => {
             <h2 className="font-semibold">Forensic Tools</h2>
           </div>
           
+          {caseEnded ?(
+            <>
+            
+            <Button onClick={Reopen_case}>Reopen Case</Button>
+            
+              <ReportBox 
+                reportText={previousReport} 
+                caseId={caseId} 
+                imageAnalysis={all_img_analysis} 
+              />
+            </>
+          
+
+        ):(
+          <>
+          
           <AnalysisTools
           caseId={caseId}
           setReportText={setReportText}
           setImageAnalysis={setImageAnalysis}
         />
-        {caseEnded ?(
-          <Button onClick={Reopen_case}>Reopen Case</Button>
-
-        ):(
           <Button onClick={End_case}>End Case</Button>
-        )}
+          </>
+        )}
         
 
         </div>
