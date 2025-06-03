@@ -39,7 +39,7 @@ export function Navbar2_1() {
             <Link to="/features" className="text-sm font-medium transition-colors hover:text-primary">
               Features
             </Link>
-            <Link to="/about" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link to="/admin-about" className="text-sm font-medium transition-colors hover:text-primary">
               About Us
             </Link>
             <Link to="/common">
@@ -48,7 +48,7 @@ export function Navbar2_1() {
                 Dashboard
               </Button>
             </Link>
-            <Link to="/profile">
+            <Link to="/public-profile">
               <Button variant="outline" size="sm" className="gap-1">
                 <User className="h-4 w-4" />
                 Profile
@@ -81,7 +81,7 @@ export function Navbar2_1() {
               <LayoutDashboard className="h-4 w-4 mr-1" />
               Dashboard
             </Link>
-            <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-sm font-medium hover:bg-accent rounded-md">
+            <Link to="/public-profile" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-sm font-medium hover:bg-accent rounded-md">
               <User className="h-4 w-4 mr-1" />
               Profile
             </Link>
