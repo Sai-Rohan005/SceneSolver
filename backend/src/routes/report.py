@@ -153,8 +153,10 @@ Generate a detailed forensic report including:
     })
 
     
-@report_bp.route("/fetch/<string:caseId>", methods=["GET"])
-def fetch_saved_report(caseId):
+@report_bp.route("/fetch", methods=["GET"])
+def fetch_saved_report():
+    case_id = request.args.get("case_id")
+
     # Connect to MongoDB
     db = get_mongo_connection()
     if db is None:
@@ -162,11 +164,9 @@ def fetch_saved_report(caseId):
 
     # Validate and fetch case
     try:
-        case = db.db.cases.find_one({"_id": ObjectId(caseId)})
+        case = db["db.cases"].find_one({"_id": ObjectId(case_id)})
     except Exception as e:
-        print("Execption",e)
         return jsonify({"error": f"Invalid case_id: {str(e)}"}), 400
-    
 
     if not case:
         return jsonify({"error": "Case not found."}), 404

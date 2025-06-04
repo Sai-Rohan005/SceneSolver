@@ -522,7 +522,7 @@ def get_references(caseId):
         if not case_type:
             return jsonify({"error": "Missing case_type"}), 400
 
-        references = list(db.db.cases.find({"case_type": case_type,"status":"closed"}))
+        references = list(db.db.cases.find({"case_type": case_type,"status":"closed" ,"_id": {"$ne": object_id}}))
         # print(references)
         # Convert ObjectId to string for each document in references
         references = [convert_objectids(ref) for ref in references]
