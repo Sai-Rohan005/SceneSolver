@@ -60,7 +60,6 @@ def post_message(case_id):
     
 
 
-@staticmethod
 def convert_objectid_to_str(obj):
     if isinstance(obj, list):
         return [convert_objectid_to_str(item) for item in obj]

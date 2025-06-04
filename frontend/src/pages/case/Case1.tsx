@@ -236,7 +236,7 @@ export default function Case1() {
 
         try{
             const getImages=await axios.get(`http://localhost:7070/api/cases/images/${caseId}`)
-            console.log(getImages);
+            
             const allFilePaths = getImages.data.map(image => image.file_path);
             setImagesuploaded(allFilePaths);
             convertAllImages(allFilePaths);
@@ -972,7 +972,7 @@ const sortedCases = [...filteredCases].sort((a, b) => {
                         
                         <Dialog open={ShowMessageDialog} onOpenChange={setShowMessageDialog}>
                         <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" disabled={caseEnded}>
                             <MessageCircle className="w-4 h-4 mr-2" />
                             Message
                             </Button>

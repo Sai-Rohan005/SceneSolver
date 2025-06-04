@@ -627,10 +627,14 @@ def upload_image_route(caseId):
 def get_case_images(caseId):
 
     try:
+        
+        case_data = db.db.cases.find_one({"_id":ObjectId(caseId)})
         # Fetch images with only file_path and case_id
         images = list(db.db.images.find(
-            {"case_id": caseId},
-            {"file_path": 1, "case_id": 1, "_id": 0}  # exclude _id
+            {"case_id": caseId,"user_id":case_data['user_id']},
+            
+            {"file_path": 1, "case_id": 1, "_id": 0,
+             }  # exclude _id
         ))
 
         if not images:
@@ -650,9 +654,6 @@ def get_case_images(caseId):
     except Exception as e:
         print(f"❌ Error fetching images for case {caseId}: {e}")
         return jsonify({"error": str(e)}), 500
-
-
-
 
 @case_bp.route('/getfilee/<string:caseId>',methods=['GET'])
 def filee_route(caseId):
@@ -716,7 +717,10 @@ def get_status(caseId):
 @case_bp.route('/fetch_img_analysis/<string:caseId>',methods=['GET'])
 def fetch_img_analysis(caseId):
     try:
-        img=db.db.images.find({'case_id':caseId})
+        case_data = db.db.cases.find_one({"_id":ObjectId(caseId)})
+        if isinstance(case_data['officer'], ObjectId):
+            officer_id = str(case_data['officer'])
+        img=db.db.images.find({'case_id':caseId,"user_id":officer_id})
         analysis_results = []
         for image in img:
             analysis_results.append({

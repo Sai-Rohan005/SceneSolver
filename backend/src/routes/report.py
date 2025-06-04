@@ -17,12 +17,17 @@ from model.image import I
 from langchain_core.prompts import PromptTemplate
 from config.config import get_mongo_connection
 from bson import ObjectId
+db = get_mongo_connection()
 
 report_bp = Blueprint('report', __name__)
 @report_bp.route("/display", methods=["GET"])
 def display():
     case_id = request.args.get("case_id")
-    l = I.get_by_case_id(case_id)  # Your DB fetch function
+    case_data = db.db.cases.find_one({"_id":ObjectId(case_id)})
+    if isinstance(case_data['officer'], ObjectId):
+        officer_id = str(case_data['officer'])
+    l=db.db.images.find({'case_id':case_id,"user_id":officer_id})
+    # l = I.get_by_case_id(case_id)  # Your DB fetch function
 
     print("case_id:", case_id)
     print("records:", l)
@@ -48,7 +53,11 @@ def generate_report():
     case_id = request.args.get("case_id")
 
     # Fetch images
-    image_list = I.get_by_case_id(case_id)
+    case_data = db.db.cases.find_one({"_id":ObjectId(case_id)})
+    if isinstance(case_data['officer'], ObjectId):
+        officer_id = str(case_data['officer'])
+    image_list=db.db.images.find({'case_id':case_id,"user_id":officer_id})
+    # image_list = I.get_by_case_id(case_id)
     if not image_list:
         return jsonify({"error": "No images found for this case."}), 404
 
