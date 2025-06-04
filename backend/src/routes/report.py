@@ -52,6 +52,7 @@ def generate_report():
 
     case_id = request.args.get("case_id")
 
+    db = get_mongo_connection()
     # Fetch images
     case_data = db.db.cases.find_one({"_id":ObjectId(case_id)})
     if isinstance(case_data['officer'], ObjectId):
@@ -62,7 +63,6 @@ def generate_report():
         return jsonify({"error": "No images found for this case."}), 404
 
     # Connect to MongoDB
-    db = get_mongo_connection()
     if db is None:
         return jsonify({"error": "Failed to connect to database"}), 500
 
