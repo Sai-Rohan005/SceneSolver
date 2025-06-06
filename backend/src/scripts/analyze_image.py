@@ -159,3 +159,7 @@ def upload_and_save_image(image_input, case_id=None, user_id=None):
         print(f"❌ Error uploading image: {e}")
         traceback.print_exc()
         return {"error": str(e), "traceback": traceback.format_exc()}
+    
+
+
+    

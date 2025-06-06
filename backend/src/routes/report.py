@@ -23,6 +23,7 @@ report_bp = Blueprint('report', __name__)
 @report_bp.route("/display", methods=["GET"])
 def display():
     case_id = request.args.get("case_id")
+    officer_id = case_data['officer']
     case_data = db.db.cases.find_one({"_id":ObjectId(case_id)})
     if isinstance(case_data['officer'], ObjectId):
         officer_id = str(case_data['officer'])
@@ -55,6 +56,7 @@ def generate_report():
     db = get_mongo_connection()
     # Fetch images
     case_data = db.db.cases.find_one({"_id":ObjectId(case_id)})
+    officer_id = case_data['officer']
     if isinstance(case_data['officer'], ObjectId):
         officer_id = str(case_data['officer'])
     image_list=db.db.images.find({'case_id':case_id,"user_id":officer_id})

@@ -718,6 +718,7 @@ def get_status(caseId):
 def fetch_img_analysis(caseId):
     try:
         case_data = db.db.cases.find_one({"_id":ObjectId(caseId)})
+        officer_id = case_data['officer']
         if isinstance(case_data['officer'], ObjectId):
             officer_id = str(case_data['officer'])
         img=db.db.images.find({'case_id':caseId,"user_id":officer_id})
